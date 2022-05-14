@@ -48,14 +48,21 @@ class Resquest(BaseHTTPRequestHandler):
         self.wfile.write(info.encode())
 
     def do_GET(self):
-        query = urlparse(self.path).query
-        params = dict(qc.split("=") for qc in query.split("&"))
+        querys = urlparse(self.path).query
         self.send_response(200)
         self.send_header("Content-type", "text/json")  # 设置服务器响应头
         self.end_headers()
-        if params.get('ip'):
-            geo_info = search_ip(ip_address=params.get('ip'), cache=self.cache)
-            self.response_data(json.dumps(geo_info))
+        if querys:
+            querys = querys.split('&')
+            params = {}
+            for qc in querys:
+                k, v = qc.split("=")
+                params[k] = v
+            if params.get('ip'):
+                geo_info = search_ip(ip_address=params.get('ip'), cache=self.cache)
+                self.response_data(json.dumps(geo_info))
+            else:
+                self.response_data('Error')
         else:
             self.response_data('Error')
 

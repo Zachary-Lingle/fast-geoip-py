@@ -55,7 +55,7 @@ def search_ip(ip_address: str, cache=None):
     ip_geo = location_list[ip_info[1]]
     geo_info = {
         'country': ip_geo[0],
-        'region': ip_geo[1],
+        'state': ip_geo[1],
         'eu': ip_geo[5],
         'timezone': ip_geo[4],
         'city': ip_geo[2],
