@@ -38,7 +38,7 @@ class Cache:
             return value
 
 
-class Resquest(BaseHTTPRequestHandler):
+class Server(BaseHTTPRequestHandler):
     timeout = 5
     server_version = "Apache"
     cache = Cache(10)
@@ -47,19 +47,19 @@ class Resquest(BaseHTTPRequestHandler):
         self.wfile.write(info.encode())
 
     def do_GET(self):
-        querys = urlparse(self.path).query
+        query = urlparse(self.path).query
         self.send_response(200)
         self.send_header("Content-type", "text/json")
         self.end_headers()
-        if querys:
-            querys = querys.split('&')
+        if query:
+            qcs = query.split('&')
             params = {}
-            for qc in querys:
+            for qc in qcs:
                 k, v = qc.split("=")
                 params[k] = v
             if params.get('ip'):
                 geo_info = search_ip(ip_address=params.get('ip'), cache=self.cache)
-                self.response_data(json.dumps(geo_info))
+                self.response_data(json.dumps(geo_info, indent=1))
             else:
                 self.response_data('Error')
         else:
@@ -67,6 +67,6 @@ class Resquest(BaseHTTPRequestHandler):
 
 
 if __name__ == '__main__':
-    server = HTTPServer(host, Resquest)
+    server = HTTPServer(host, Server)
     print("Starting fast-geoip-py server, listen at: %s:%s" % host)
     server.serve_forever()
