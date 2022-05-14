@@ -1,9 +1,9 @@
-from processGeoIpCsv import ipStr2Int
+from process import ip_str_to_int
 import json
 
 
-def read_json(filename):
-    with open('data/{}.json'.format(filename), 'r') as r_file:
+def read_json(filename, path='data'):
+    with open('{}/{}.json'.format(path, filename), 'r') as r_file:
         data = json.load(fp=r_file)
     return data
 
@@ -34,16 +34,20 @@ def binary_search(ip_list, ip):
             low = i
 
 
-def search_ip(ip_address: str):
-    ip_int = ipStr2Int(ip_address)
-    params = read_json('params')
+def search_ip(ip_address: str, cache=None):
+    ip_int = ip_str_to_int(ip_address)
+    params = read_json('params', path='conf')
     ip_range_list = read_json('index')
     x = binary_search(ip_range_list, ip_int)
     ip_range_list = read_json('i{}'.format(x))
     y = binary_search(ip_range_list, ip_int)
     index = x * params.get('NUMBER_NODES_PER_MIDINDEX') + y
     # print(x, y, x * params.get('NUMBER_NODES_PER_MIDINDEX') + y)
-    ip_info_list = read_json('{}'.format(index))
+    if cache and cache.find(index) >= 0:
+        ip_info_list = cache.get(index)
+    else:
+        ip_info_list = read_json('{}'.format(index))
+
     ip_info_index = binary_search(ip_info_list, ip_int)
     # print(ip_info_list[ip_info_index])
     ip_info = ip_info_list[ip_info_index]
