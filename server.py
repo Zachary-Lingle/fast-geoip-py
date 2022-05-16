@@ -2,9 +2,9 @@ import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
 
-from search import search_ip
+from search import search_ip, read_json
 
-host = ('localhost', 21700)
+host = ('127.0.0.1', 21700)
 
 
 class Cache:
@@ -42,6 +42,7 @@ class Server(BaseHTTPRequestHandler):
     timeout = 5
     server_version = "Apache"
     cache = Cache(10)
+    location_list = read_json('locations')
 
     def response_data(self, info: str):
         self.wfile.write(info.encode())
@@ -58,7 +59,7 @@ class Server(BaseHTTPRequestHandler):
                 k, v = qc.split("=")
                 params[k] = v
             if params.get('ip'):
-                geo_info = search_ip(ip_address=params.get('ip'), cache=self.cache)
+                geo_info = search_ip(ip_address=params.get('ip'), cache=self.cache, location_list=self.location_list)
                 self.response_data(json.dumps(geo_info, indent=1))
             else:
                 self.response_data('Error')
